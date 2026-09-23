@@ -1,0 +1,344 @@
+// Billinare Deal Option — database schema
+// SQLite for local dev; switch provider to "postgresql" for Supabase/production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ IDENTITY ============
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  emailVerified    Boolean   @default(false)
+  passwordHash     String
+  fullName         String
+  country          String    @default("")
+  phone            String    @default("")
+  role             String    @default("user") // user | admin
+  status           String    @default("active") // active | suspended | banned
+  activeAccount    String    @default("demo") // demo | real
+  twoFactorEnabled Boolean   @default(false)
+  twoFactorSecret  String?
+  referralCode     String    @unique
+  referredById     String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastLoginAt      DateTime?
+
+  demoAccount    DemoAccount?
+  positions      Position[]
+  fixedTimeDeals FixedTimeDeal[]
+  transactions   Transaction[]
+  notifications  Notification[]
+  sessions       Session[]
+  auditLogs      AuditLog[]
+  bots           Bot[]
+  watchlistItems WatchlistItem[]
+  loginEvents    LoginEvent[]
+  wallet         Wallet?
+  derivAccount   DerivAccount?
+}
+
+// ============ ACCOUNTS ============
+
+model DemoAccount {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Float
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Float    @default(0)
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * DerivAccount — a linked real-money account.
+ * balance is the last balance reported by the connected Deriv API
+ * (authorised tokens only). It is owned by the provider: deposits to it are
+ * made on Deriv's own cashier, and the local number exists only to show
+ * synced state. Trading against it is disabled until the Deriv adapter
+ * (REAL_TRADING_ENABLED) is configured and verified.
+ */
+model DerivAccount {
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loginId     String    @default("")
+  currency    String    @default("USD")
+  balance     Float     @default(0)
+  balanceFrom String    @default("local") // local | deriv_api
+  syncedAt    DateTime?
+  tokenRef    String    @default("") // keychain/env ref only — never the raw token
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ============ MARKETS ============
+
+model Asset {
+  id             String          @id @default(uuid())
+  symbol         String          @unique
+  name           String
+  category       String // forex | crypto | indices | commodities | metals
+  digits         Int
+  basePrice      Float
+  volatility     Float
+  contractSize   Float           @default(1)
+  payoutRate     Float           @default(0.85) // fixed-time payout rate
+  sortOrder      Int             @default(100)
+  active         Boolean         @default(true)
+  positions      Position[]
+  fixedDeals     FixedTimeDeal[]
+  watchlistItems WatchlistItem[]
+  botSignals     BotSignal[]
+
+  @@index([category, sortOrder])
+}
+
+model WatchlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, assetId])
+}
+
+// ============ TRADING (DEMO LEDGER) ============
+
+model Position {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetId      String
+  asset        Asset     @relation(fields: [assetId], references: [id])
+  demo         Boolean   @default(true)
+  side         String // buy | sell
+  size         Float // lots
+  margin       Float
+  entryPrice   Float
+  openPrice    Float     @default(0)
+  exitPrice    Float?
+  currentPrice Float?
+  sl           Float?
+  tp           Float?
+  pnl          Float?
+  status       String    @default("open") // open | closed
+  closeReason  String    @default("") // manual | stop_loss | take_profit
+  openedAt     DateTime  @default(now())
+  closedAt     DateTime?
+
+  @@index([userId, status])
+}
+
+model FixedTimeDeal {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetId     String
+  asset       Asset     @relation(fields: [assetId], references: [id])
+  demo        Boolean   @default(true)
+  direction   String // up | down
+  stake       Float
+  durationSec Int
+  expiresAt   DateTime
+  payoutRate  Float
+  entryPrice  Float
+  exitPrice   Float?
+  payout      Float?
+  status      String    @default("open") // open | won | lost
+  openedAt    DateTime  @default(now())
+  settledAt   DateTime?
+
+  @@index([userId, status])
+}
+
+// ============ PAYMENTS ============
+
+model Transaction {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  demo        Boolean   @default(true)
+  type        String // deposit | withdrawal
+  amount      Float
+  currency    String    @default("USD")
+  method      String    @default("demo_credit")
+  reference   String    @default("")
+  status      String    @default("pending") // pending | processing | completed | failed | rejected | cancelled
+  note        String    @default("")
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, type])
+}
+
+// ============ NOTIFICATIONS & AUDIT ============
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // info | trade | security | system
+  title     String
+  body      String   @default("")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  detail    String   @default("")
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model WebhookEvent {
+  id        String   @id @default(uuid())
+  provider  String
+  eventId   String   @unique
+  payload   String
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ============ SECURITY ============
+
+model Session {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  device     String    @default("")
+  lastSeenAt DateTime?
+  userAgent  String    @default("")
+  ip         String    @default("")
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+
+  @@index([userId])
+}
+
+model LoginEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  email     String
+  success   Boolean
+  device    String   @default("")
+  ip        String   @default("")
+  userAgent String   @default("")
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([email, createdAt])
+}
+
+// ============ DOLLARPRINTER BOTS ============
+
+model Bot {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  demo           Boolean   @default(true)
+  assetSymbol    String
+  status         String    @default("stopped") // running | paused | stopped
+  pauseReason    String    @default("")
+  strategyType   String // rsi_ema | breakout | martingale_cautious | digit_evenodd | manual_rules
+  strategyParams String    @default("{}") // JSON
+  riskParams     String    @default("{}") // JSON: maxStake, maxDailyLoss, maxTrades, maxConsecutiveLosses
+  stake          Float
+  tradeCount     Int       @default(0)
+  winCount       Int       @default(0)
+  lossCount      Int       @default(0)
+  pnl            Float     @default(0)
+  startedAt      DateTime?
+  lastSignalAt   DateTime?
+  lastTradeAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  signals BotSignal[]
+  trades  BotTrade[]
+  logs    BotLog[]
+
+  @@index([userId, status])
+}
+
+model BotSignal {
+  id        String   @id @default(uuid())
+  botId     String
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id])
+  signal    String // buy | sell | up | down
+  price     Float
+  reason    String   @default("")
+  acted     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([botId, createdAt])
+}
+
+model BotTrade {
+  id           String    @id @default(uuid())
+  botId        String
+  bot          Bot       @relation(fields: [botId], references: [id], onDelete: Cascade)
+  userId       String
+  demo         Boolean   @default(true)
+  symbol       String    @default("VOL100") // asset at trade time
+  durationSec  Int       @default(60)
+  kind         String // fixed_time
+  direction    String // up | down
+  stake        Float
+  payoutRate   Float
+  entryPrice   Float
+  exitPrice    Float?
+  payout       Float?
+  pnl          Float?
+  status       String    @default("open") // open | won | lost
+  contractType String    @default("rise_fall") // rise_fall | even_odd | over_under | matches_differs | differs | pattern_evenodd
+  barrier      Int?
+  openedAt     DateTime  @default(now())
+  closedAt     DateTime?
+
+  @@index([botId, status])
+}
+
+model BotLog {
+  id        String   @id @default(uuid())
+  botId     String
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  level     String   @default("info") // info | signal | trade | warn | error
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([botId, createdAt])
+}

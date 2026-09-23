@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+@theme {
+  --breakpoint-xs: 420px;
+}
+
+/* ============================================================
+   Billinare Deal Option — LIGHT TERMINAL THEME
+   Matched palette: white surfaces, navy chrome, red ticker,
+   teal run-actions, blue primaries, yellow badges.
+   ============================================================ */
+
+:root {
+  --bg: #f3f5f9;            /* light app background */
+  --panel: #ffffff;         /* cards */
+  --panel-2: #f7f9fc;       /* inset panels / hovers */
+  --border: #e3e8f0;
+  --border-2: #cbd5e4;
+  --text: #0f1d40;          /* dark navy ink */
+  --text-dim: #5a6a8c;
+  --text-faint: #8b97b0;
+  --green: #12a150;         /* up */
+  --red: #e11d2e;           /* down / ticker red family */
+  --teal: #00b5a0;          /* Run button / live accents */
+  --blue: #2563eb;          /* primary actions */
+  --amber: #f6b100;         /* premium / warning badges */
+  --navy: #0c1c52;          /* main nav chrome */
+  --navy-2: #1c3a94;        /* active nav block */
+  --redbar: #d9232e;        /* announcement ticker */
+  --icred: #e2444d;         /* nav icon red */
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel-2);
+  --color-line: var(--border);
+  --color-line2: var(--border-2);
+  --color-ink: var(--text);
+  --color-dim: var(--text-dim);
+  --color-faint: var(--text-faint);
+  --color-up: var(--green);
+  --color-down: var(--red);
+  --color-cyan: var(--teal);
+  --color-brand: var(--blue);
+  --color-amber: var(--amber);
+  --color-navy: var(--navy);
+  --color-navy2: var(--navy-2);
+  --color-redbar: var(--redbar);
+  --color-icred: var(--icred);
+}
+
+html { color-scheme: light; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+* { scrollbar-width: thin; scrollbar-color: #c3cede transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #c3cede; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- Panels & cards ---------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 29, 64, .05), 0 1px 6px rgba(15, 29, 64, .04);
+}
+.panel-2 {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* ---------- Inputs ---------- */
+.inp {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.inp:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.inp::placeholder { color: var(--text-faint); }
+.inp:disabled { background: var(--panel-2); color: var(--text-faint); }
+select.inp {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #5a6a8c 50%), linear-gradient(135deg, #5a6a8c 50%, transparent 50%);
+  background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%;
+  background-size: 5px 5px; background-repeat: no-repeat;
+}
+
+.label { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; display: block; letter-spacing: .02em; font-weight: 600; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 8px; font-size: 13px; font-weight: 700; padding: 8px 14px;
+  cursor: pointer; border: 1px solid transparent;
+  transition: filter .15s, background .15s, border-color .15s, opacity .15s;
+  user-select: none;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: linear-gradient(135deg, #3572ec, #1d4ed8); color: #fff; }
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-run { background: linear-gradient(135deg, #0fc2a5, #00a08a); color: #fff; }
+.btn-run:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-up { background: linear-gradient(135deg, #0fc2a5, #00a08a); color: #fff; }
+.btn-up:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-down { background: linear-gradient(135deg, #e5484d, #c81e2b); color: #fff; }
+.btn-down:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-ghost { background: #ffffff; border-color: var(--border-2); color: var(--text-dim); }
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: #9fb0cc; }
+.btn-ghost.active { color: var(--teal); border-color: var(--teal); background: rgba(0, 181, 160, .06); }
+.btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 7px; }
+.btn-xs { padding: 3px 9px; font-size: 11px; border-radius: 6px; }
+
+/* ---------- Tags & badges ---------- */
+.tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; }
+.tag-demo { background: var(--blue); color: #ffffff; }
+.tag-real { background: var(--red); color: #ffffff; }
+.tag-live { background: var(--teal); color: #ffffff; }
+.badge-premium { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800; letter-spacing: .08em; padding: 3px 10px; border-radius: 6px; background: var(--amber); color: #231a00; text-transform: uppercase; }
+.chip-warn { display: inline-flex; align-items: center; gap: 6px; background: #ffd60a; color: #1c1600; font-size: 11.5px; font-weight: 700; padding: 6px 12px; border-radius: 8px; }
+
+/* ---------- Status dots ---------- */
+.dot { width: 7px; height: 7px; border-radius: 99px; display: inline-block; }
+.dot-live { background: var(--teal); animation: pulse 2s ease-in-out infinite; }
+.dot-off { background: var(--red); }
+.dot-warn { background: var(--amber); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* ---------- Tables ---------- */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.panel > .tbl { min-width: 640px; }
+.tbl th { text-align: left; color: var(--text-faint); font-weight: 700; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; padding: 9px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; background: #fbfcfe; }
+.tbl td { padding: 9px 10px; border-bottom: 1px solid #eef1f6; white-space: nowrap; }
+.tbl tr:hover td { background: #f7f9fc; }
+
+/* ---------- Toasts ---------- */
+.toast-in { animation: toastIn .25s ease-out; }
+@keyframes toastIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ---------- Skeleton ---------- */
+.skel { background: linear-gradient(90deg, #eaeef5 25%, #f4f7fb 50%, #eaeef5 75%); background-size: 200% 100%; animation: skel 1.4s infinite; border-radius: 6px; }
+@keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ---------- Modal ---------- */
+.modal-backdrop { background: rgba(15, 29, 64, .45); backdrop-filter: blur(3px); }
+.modal-in { animation: modalIn .18s ease-out; }
+@keyframes modalIn { from { transform: scale(.97); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ---------- Flash on price change ---------- */
+.flash-up { animation: flashUp .5s; }
+.flash-down { animation: flashDown .5s; }
+@keyframes flashUp { 0% { color: var(--green); } 100% { color: inherit; } }
+@keyframes flashDown { 0% { color: var(--red); } 100% { color: inherit; } }
+
+/* ---------- Landing animations ---------- */
+@keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes gridDrift { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes glowPulse { 0%,100% { box-shadow: 0 0 20px rgba(37, 99, 235, .18); } 50% { box-shadow: 0 0 40px rgba(37, 99, 235, .34); } }
+.anim-float { animation: floatY 5s ease-in-out infinite; }
+.anim-ticker { animation: tickerScroll 36s linear infinite; }
+.anim-grid { background-image: linear-gradient(rgba(12, 28, 82, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(12, 28, 82, .045) 1px, transparent 1px); background-size: 40px 40px; animation: gridDrift 6s linear infinite; }
+.anim-fadeup { animation: fadeUp .7s ease-out both; }
+.anim-glow { animation: glowPulse 3s ease-in-out infinite; }
+.anim-delay-1 { animation-delay: .12s; }
+.anim-delay-2 { animation-delay: .24s; }
+.anim-delay-3 { animation-delay: .36s; }
+.anim-delay-4 { animation-delay: .48s; }
