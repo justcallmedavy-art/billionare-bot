@@ -76,17 +76,18 @@ model Wallet {
  * (REAL_TRADING_ENABLED) is configured and verified.
  */
 model DerivAccount {
-  id          String    @id @default(uuid())
-  userId      String    @unique
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  loginId     String    @default("")
-  currency    String    @default("USD")
-  balance     Float     @default(0)
-  balanceFrom String    @default("local") // local | deriv_api
-  syncedAt    DateTime?
-  tokenRef    String    @default("") // keychain/env ref only — never the raw token
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loginId        String    @default("")
+  currency       String    @default("USD")
+  balance        Float     @default(0)
+  balanceFrom    String    @default("local") // local | deriv_api
+  syncedAt       DateTime?
+  tokenRef       String    @default("") // keychain/env ref only — never the raw token
+  tokenEncrypted String    @default("") // AES-256-GCM box of the OAuth token for server-side API calls (src/lib/security/secret-box.ts)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 // ============ MARKETS ============

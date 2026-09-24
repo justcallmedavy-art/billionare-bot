@@ -11,6 +11,7 @@ const DERIV_ERRORS: Record<string, string> = {
   deriv_state_mismatch: "Sign-in session expired or invalid. Please try the Deriv button again.",
   deriv_denied: "Deriv authorization was cancelled or returned no accounts.",
   deriv_verify_failed: "We could not verify your Deriv token with Deriv's servers. Nothing was linked.",
+  deriv_error: "Something went wrong during Deriv sign-in. Please try again.",
   deriv_rate_limited: "Too many attempts. Please wait a minute and try again.",
   suspended: "This account is suspended. Contact support.",
 };

@@ -24,6 +24,10 @@ export async function GET(req: Request) {
   authUrl.searchParams.set("app_id", appId);
   authUrl.searchParams.set("l", "EN");
   authUrl.searchParams.set("brand", "deriv");
+  authUrl.searchParams.set("state", state);
+  // Send state even though Deriv's legacy OAuth (which returns acctN/tokenN
+  // query params) does not echo it on callback. Harmless if ignored, and
+  // correct if Deriv ever starts echoing it — see callback validation.
 
   const res = NextResponse.redirect(authUrl.toString());
   res.cookies.set("deriv_oauth_state", state, {
