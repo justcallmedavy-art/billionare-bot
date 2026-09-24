@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Info, Plus, ArrowUpRight } from "lucide-react";
+import { Plus, ArrowUpRight } from "lucide-react";
 import { useAuth } from "@/components/providers/auth";
 import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
@@ -59,17 +59,6 @@ export default function WalletPage() {
   return (
     <div className="space-y-4 max-w-3xl">
       <h1 className="text-lg font-bold">Wallet & funding</h1>
-
-      <div className="panel-2 p-4 flex items-start gap-3 border-cyan/20">
-        <Info size={16} className="text-cyan shrink-0 mt-0.5" />
-        <div className="text-[12.5px] text-dim">
-          This deployment runs in <strong className="text-ink">demo-only mode</strong>. "Funding" adds
-          simulated demo balance for practice — it is not a real deposit, no payment is processed, and
-          demo funds cannot be withdrawn. Real deposits/withdrawals will appear here only after a
-          verified payment provider is connected, and every status change will come from that
-          provider's actual confirmation — never simulated.
-        </div>
-      </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
         <div className="panel p-4">
